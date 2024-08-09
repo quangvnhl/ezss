@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1><%= randomCharacters %></h1>
+    <% shortData.forEach(function(short){ %>
+    <ul>
+        <li><%= short.title %></li>
+        <li><%= short.type %></li>
+        <li><%= short.encode %></li>
+        <li><%= short.decode %></li>
+        <li><%= short.password %></li>
+        <li><%= short.time %></li>
+    </ul>
+    <% }); %>
+</body>
+</html>

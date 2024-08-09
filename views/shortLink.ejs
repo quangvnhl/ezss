@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Short Link</title>
+</head>
+<body>
+    <h1>Add Short Link</h1>
+    <form action="/ShortLink" method="POST" onsubmit="return CreateShortLink()">
+        <div>
+            <label for="inputUrl">URL</label>
+        </div>
+        <div>
+            <input type="text" name="url" id="inputUrl" placeholder="URL Here">
+        </div>
+        <div>
+            <p><strong>Additional</strong></p>
+            <div>
+                <label for="inputTitle">Title</label>
+                <input type="text" name="title" id="inputTitle" placeholder="Title">
+            </div>
+            <div>
+                <label for="inputPassword">Password</label>
+                <input type="text" name="password" id="inputPassword" placeholder="URL Password">
+            </div>
+        </div>
+        <div id="response-text"></div>
+        <div>
+            <button type="submit" id="submit">Create Short Link</button>
+        </div>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        document.querySelector('#submit').addEventListener('click', CreateShortLink);
+
+        var CreateShortLink = function(){
+            console.log('submit')
+            document.querySelector('#response-text').textContent = '';
+            var inputURL = document.querySelector('#inputUrl');
+            var inputTitle = document.querySelector('#inputTitle');
+            var inputPassword = document.querySelector('#inputPassword');
+            if(inputURL.value.length){
+                axios({
+                    method: 'post',
+                    url: '/ShortLink',
+                    data:{
+                        url: inputURL.value,
+                        title: inputTitle.value,
+                        password: inputPassword.value,
+                    }
+                })
+                .then(function (response) {
+                    document.querySelector('#response-text').textContent = response.data.message
+                });
+            }
+            else{
+                document.querySelector('#response-text').textContent = 'Hãy nhập nội dung';
+            }
+
+            return false;
+        }
+    </script>
+</body>
+</html>
