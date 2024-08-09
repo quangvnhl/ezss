@@ -4,8 +4,8 @@ const app = express();
 const port = process.env.PORT || 3003;
 
 const {MongoClient, ServerApiVersion} = require("mongodb");
-// const uri = "mongodb+srv://cukinacha:SMfIkhwpVg54GBnj@cluster0.b9x0pn0.mongodb.net/?retryWrites=true&w=majority";
-const uri = "mongodb://127.0.0.1:27017";
+const uri = "mongodb+srv://cukinacha:SMfIkhwpVg54GBnj@cluster0.b9x0pn0.mongodb.net/?retryWrites=true&w=majority";
+// const uri = "mongodb://127.0.0.1:27017";
 
 const dbName = "ezss";
 const dbColSetting = "setting";
