@@ -89,7 +89,8 @@ app.post('/ShortLink', (req, res) => {
             console.log('Inserted a Short URL =>', insertResult);
             res.send({
                 status: true,
-                messageCode: 1
+                messageCode: 1,
+                shortCode: randomCharacters
             });
 
         } finally {

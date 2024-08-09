@@ -29,6 +29,8 @@
         <div>
             <button type="submit" id="submit">Create Short Link</button>
         </div>
+
+        <div id="complete"></div>
     </form>
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
@@ -52,7 +54,12 @@
                     }
                 })
                 .then(function (response) {
-                    document.querySelector('#response-text').textContent = response.data.message
+                    console.log(response.status)
+                    document.querySelector('#response-text').textContent = response.messageCode
+                    document.querySelector('#complete').style.display = "block";
+                    var link = location.origin+'/s/'+response.data.shortCode;
+                    document.querySelector('#complete').innerHTML = '<a href="'+link+'" target="_blank">'+link+'</a>';
+
                 });
             }
             else{
