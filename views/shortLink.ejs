@@ -17,6 +17,10 @@
         <div>
             <p><strong>Additional</strong></p>
             <div>
+                <label for="inputTitle">Alias</label>
+                <input type="text" name="alias" id="inputAlias" placeholder="Alias">
+            </div>
+            <div>
                 <label for="inputTitle">Title</label>
                 <input type="text" name="title" id="inputTitle" placeholder="Title">
             </div>
@@ -50,15 +54,26 @@
                     data:{
                         url: inputURL.value,
                         title: inputTitle.value,
+                        alias: inputAlias.value,
                         password: inputPassword.value,
                     }
                 })
                 .then(function (response) {
-                    console.log(response.status)
-                    document.querySelector('#response-text').textContent = response.messageCode
-                    document.querySelector('#complete').style.display = "block";
-                    var link = location.origin+'/s/'+response.data.shortCode;
-                    document.querySelector('#complete').innerHTML = '<a href="'+link+'" target="_blank">'+link+'</a>';
+                    if(response.status=200){
+                        if(response.data.status){
+                            document.querySelector('#complete').style.display = "block";
+                            var link = location.origin+'/s/'+response.data.shortCode;
+                            document.querySelector('#complete').innerHTML = '<a href="'+link+'" target="_blank">'+link+'</a>';
+                        }
+                        else{
+                            document.querySelector('#response-tex').textContent = response.data.messageCode;
+                        }
+                    }
+                    else{
+                        document.querySelector('#response-text').textContent = 'Error'
+                    }
+                    
+                    
 
                 });
             }

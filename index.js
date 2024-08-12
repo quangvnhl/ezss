@@ -19,37 +19,39 @@ app.use(bodyParser());
 
 app.set('view engine', 'ejs');
 
+
 app.get('/', (req, res) => {
     const client = new MongoClient(uri);
     async function run() {
     try {
         // Connect to the "insertDB" database and access its "haiku" collection
-        const database = client.db(dbName);
-        const short = database.collection(dbColShort);
+        // const database = client.db(dbName);
+        // const short = database.collection(dbColShort);
 
-        const getShorts = short.find({}).sort({time: -1}).limit(100);
+        // const getShorts = short.find({}).sort({time: -1}).limit(100);
 
-        var shortData = [];
-        for await (const short of getShorts) {
-            shortData.push({
-                title : short.title,
-                time : moment(short.created_at).format("HH:mm:ss DD/MM/YYYY"),
-                encode : short.encode,
-                decode : short.decode,
-                type: short.type,
-                password: short.password
-            })
-        }
-        
+        // var shortData = [];
+        // for await (const short of getShorts) {
+        //     shortData.push({
+        //         title : short.title,
+        //         time : moment(short.created_at).format("HH:mm:ss DD/MM/YYYY"),
+        //         encode : short.encode,
+        //         decode : short.decode,
+        //         type: short.type,
+        //         password: short.password
+        //     })
+        // }
+       
+        console.log(createRandomCode())
 
         // random characters
 
-        let randomCharacters = (Math.random() + 6).toString(36).slice(2,8);
+       // let randomCharacters = (Math.random() + 6).toString(36).slice(2,8);
 
-        console.log(randomCharacters);
+        //console.log(randomCharacters);
         res.render('index',{
-            shortData : shortData,
-            randomCharacters: randomCharacters.toUpperCase()
+            //shortData : shortData,
+            //randomCharacters: randomCharacters.toUpperCase()
         });
         
 
@@ -68,30 +70,58 @@ app.get("/ShortLink", (req, res) => {
 })
 
 app.post('/ShortLink', (req, res) => {
-    console.log(req.body)
+    // console.log(req.body)
     if(req.body.url){
         const client = new MongoClient(uri);
         async function run() {
         try {
             const database = client.db(dbName);
             const short = database.collection(dbColShort);
-
-            let randomCharacters = (Math.random() + 6).toString(36).slice(2,8).toUpperCase();
-
-            const insertResult = await short.insertOne({ 
-                type: "url",
-                encode: randomCharacters,
-                decode: req.body.url, 
-                title: req.body.title, 
-                password: req.body.password, 
-                time: new Date().getTime() 
-            });
-            console.log('Inserted a Short URL =>', insertResult);
-            res.send({
-                status: true,
-                messageCode: 1,
-                shortCode: randomCharacters
-            });
+            var alias = "";
+            if(req.body.alias.length){
+                alias = req.body.alias;
+                const queryCheckAlias = await short.findOne({encode: alias});
+                if(queryCheckAlias == null){
+                    const insertResult = await short.insertOne({ 
+                        type: "url",
+                        encode: alias,
+                        decode: req.body.url, 
+                        title: req.body.title, 
+                        password: req.body.password, 
+                        time: new Date().getTime() 
+                    });
+                    console.log('Inserted a Short URL =>', insertResult);
+                    res.send({
+                        status: true,
+                        messageCode: 1,
+                        shortCode: alias
+                    });
+                }
+                else{
+                    res.send({
+                        status: false,
+                        messageCode: -2
+                    });
+                }
+            }
+            else{
+                alias = createRandomCode();
+                const insertResult = await short.insertOne({ 
+                    type: "url",
+                    encode: alias,
+                    decode: req.body.url, 
+                    title: req.body.title, 
+                    password: req.body.password, 
+                    time: new Date().getTime() 
+                });
+                console.log('Inserted a Short URL =>', insertResult);
+                res.send({
+                    status: true,
+                    messageCode: 1,
+                    shortCode: alias
+                });
+            }            
+            
 
         } finally {
             // Close the MongoDB client connection
@@ -109,7 +139,52 @@ app.post('/ShortLink', (req, res) => {
     }
 })
 
-app.get("/s/:shortCode", (req, res) => {
+
+app.get('/list', (req, res) => {
+    const client = new MongoClient(uri);
+    async function run() {
+    try {
+        const database = client.db(dbName);
+        const short = database.collection(dbColShort);
+
+        const getShorts = short.find({}).sort({time: -1}).limit(100);
+
+        var shortData = [];
+        for await (const short of getShorts) {
+            shortData.push({
+                title : short.title,
+                time : moment(short.created_at).format("HH:mm:ss DD/MM/YYYY"),
+                encode : short.encode,
+                decode : short.decode,
+                type: short.type,
+                password: short.password
+            })
+        }
+       
+        // console.log(createRandomCode())
+
+        // random characters
+
+       // let randomCharacters = (Math.random() + 6).toString(36).slice(2,8);
+
+        //console.log(randomCharacters);
+        res.render('list',{
+            shortData : shortData
+        });
+        
+
+    } finally {
+        // Close the MongoDB client connection
+        await client.close();
+    }
+    }
+    // Run the function and handle any errors
+    run().catch(console.dir);
+    
+})
+
+
+app.get("/:shortCode", (req, res) => {
     const client = new MongoClient(uri);
     async function run() {
     try {
@@ -117,7 +192,7 @@ app.get("/s/:shortCode", (req, res) => {
         const database = client.db(dbName);
         const short = database.collection(dbColShort);
 
-        const getShort = await short.findOne({ encode: req.params.shortCode.toUpperCase() });
+        const getShort = await short.findOne({ encode: req.params.shortCode });
 
         if(getShort != null){
             if(getShort.decode.length)
@@ -146,7 +221,20 @@ app.get("/s/:shortCode", (req, res) => {
     run().catch(console.dir);
 })
 
-
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
+
+
+function createRandomCode(){
+    let randomCharacters = (Math.random() + 6).toString(36).slice(2,7);
+    var encodeChars = "";
+    for(const char in randomCharacters){
+        var randomBoolean = Math.random() < 0.5;
+        if(randomBoolean)
+            encodeChars += randomCharacters[char].toUpperCase();
+        else
+            encodeChars += randomCharacters[char];
+    }
+    return encodeChars;
+}
