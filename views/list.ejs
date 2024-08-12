@@ -9,12 +9,14 @@
     <h1>Listing</h1>
     <% shortData.forEach(function(short){ %>
     <ul>
-        <li><%= short.title %></li>
-        <li><%= short.type %></li>
-        <li><a href="/<%= short.encode %>"><%= short.encode %></a></li>
-        <li><%= short.decode %></li>
-        <li><%= short.password %></li>
-        <li><%= short.time %></li>
+        <li>Title: <%= short.title %></li>
+        <li>Type: <%= short.type %></li>
+        <li>Link: <a href="/<%= short.encode %>">/<%= short.encode %></a></li>
+        <li>URL: <%= short.decode %></li>
+        <li>Password: <%= short.password %></li>
+        <li>Create time: <%= short.time %></li>
+        <li><a href="/edit/<%= short.encode %>">Edit</a></li>
+        <li><a href="/delete/<%= short.id %>">Delete</a></li>
     </ul>
     <% }); %>
 </body>

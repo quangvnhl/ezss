@@ -6,32 +6,35 @@
     <title>Short Link</title>
 </head>
 <body>
-    <h1>Add Short Link</h1>
-    <form action="/ShortLink" method="POST" onsubmit="return CreateShortLink()">
+    <h1>Short Link <% if (typeof(formData) == "object"){ %> <%= formData.encode %> <% } %></h1>
+    <form action="<%= actionURL %>" method="POST" onsubmit="return ActionShortLink()">
+        <% if (typeof(formData) == "object"){ %> 
+            <input type="hidden" name="shortId" id="shortId" value="<%= formData._id %>">
+        <% } %>
         <div>
             <label for="inputUrl">URL</label>
         </div>
         <div>
-            <input type="text" name="url" id="inputUrl" placeholder="URL Here">
+            <input type="text" name="url" id="inputUrl" placeholder="URL Here" <% if (typeof(formData) == "object"){ %> value="<%= formData.decode %>" <% } %> >
         </div>
         <div>
             <p><strong>Additional</strong></p>
             <div>
                 <label for="inputTitle">Alias</label>
-                <input type="text" name="alias" id="inputAlias" placeholder="Alias">
+                <input type="text" name="alias" id="inputAlias" placeholder="Alias" <% if (typeof(formData) == "object"){ %> value="<%= formData.encode %>" <% } %> >
             </div>
             <div>
                 <label for="inputTitle">Title</label>
-                <input type="text" name="title" id="inputTitle" placeholder="Title">
+                <input type="text" name="title" id="inputTitle" placeholder="Title" <% if (typeof(formData) == "object"){ %> value="<%= formData.title %>" <% } %> >
             </div>
             <div>
                 <label for="inputPassword">Password</label>
-                <input type="text" name="password" id="inputPassword" placeholder="URL Password">
+                <input type="text" name="password" id="inputPassword" placeholder="URL Password" <% if (typeof(formData) == "object"){ %> value="<%= formData.password %>" <% } %> >
             </div>
         </div>
         <div id="response-text"></div>
         <div>
-            <button type="submit" id="submit">Create Short Link</button>
+            <button type="submit" id="submit"><%= actionName %> Short Link</button>
         </div>
 
         <div id="complete"></div>
@@ -39,34 +42,38 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
     <script>
-        document.querySelector('#submit').addEventListener('click', CreateShortLink);
+        document.querySelector('#submit').addEventListener('click', ActionShortLink);
 
-        var CreateShortLink = function(){
-            console.log('submit')
+        var ActionShortLink = function(){
             document.querySelector('#response-text').textContent = '';
             var inputURL = document.querySelector('#inputUrl');
             var inputTitle = document.querySelector('#inputTitle');
             var inputPassword = document.querySelector('#inputPassword');
+            
             if(inputURL.value.length){
+                var shortLinkData = {
+                    url: inputURL.value,
+                    title: inputTitle.value,
+                    alias: inputAlias.value,
+                    password: inputPassword.value,
+                };
+                if(document.querySelector('#shortId'))
+                    shortLinkData.id = document.querySelector('#shortId').value;
                 axios({
                     method: 'post',
-                    url: '/ShortLink',
-                    data:{
-                        url: inputURL.value,
-                        title: inputTitle.value,
-                        alias: inputAlias.value,
-                        password: inputPassword.value,
-                    }
+                    url: '<%= actionURL %>',
+                    data: shortLinkData
                 })
                 .then(function (response) {
                     if(response.status=200){
                         if(response.data.status){
                             document.querySelector('#complete').style.display = "block";
-                            var link = location.origin+'/s/'+response.data.shortCode;
+                            var link = location.origin+'/'+response.data.shortCode;
                             document.querySelector('#complete').innerHTML = '<a href="'+link+'" target="_blank">'+link+'</a>';
+                            document.querySelector('#response-text').textContent = response.data.messageCode;
                         }
                         else{
-                            document.querySelector('#response-tex').textContent = response.data.messageCode;
+                            document.querySelector('#response-text').textContent = response.data.messageCode;
                         }
                     }
                     else{
