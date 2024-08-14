@@ -88,14 +88,25 @@ app.post('/ShortLink', (req, res) => {
                 alias = req.body.alias;
                 const queryCheckAlias = await short.findOne({encode: alias});
                 if(queryCheckAlias == null){
-                    const insertResult = await short.insertOne({ 
+                    const dataInsert = { 
                         type: "url",
                         encode: alias,
                         decode: req.body.url, 
                         title: req.body.title, 
                         password: req.body.password, 
                         time: new Date().getTime() 
-                    });
+                    };
+                    if(req.body.type){
+                        switch (req.body.type){
+                            case 'redirect':
+                                dataInsert.type = "url";
+                                break;
+                            case 'embed':
+                                dataInsert.type = "frame";
+                                break;
+                        }
+                    }
+                    const insertResult = await short.insertOne(dataInsert);
                     console.log('Inserted a Short URL =>', insertResult);
                     res.send({
                         status: true,
@@ -112,14 +123,25 @@ app.post('/ShortLink', (req, res) => {
             }
             else{
                 alias = createRandomCode();
-                const insertResult = await short.insertOne({ 
+                const dataInsert = { 
                     type: "url",
                     encode: alias,
                     decode: req.body.url, 
                     title: req.body.title, 
                     password: req.body.password, 
                     time: new Date().getTime() 
-                });
+                };
+                if(req.body.type){
+                    switch (req.body.type){
+                        case 'redirect':
+                            dataInsert.type = "url";
+                            break;
+                        case 'embed':
+                            dataInsert.type = "frame";
+                            break;
+                    }
+                }
+                const insertResult = await short.insertOne(dataInsert);
                 console.log('Inserted a Short URL =>', insertResult);
                 res.send({
                     status: true,
@@ -144,6 +166,14 @@ app.post('/ShortLink', (req, res) => {
         });
     }
 })
+
+
+// app.get("/link-embed", (req, res) => {
+//     res.render('embedLink',{
+//         actionURL: "/EmbedLink",
+//         actionName: 'Create',
+//     });
+// })
 
 
 app.get('/list', (req, res) => {
@@ -324,8 +354,18 @@ app.get("/:shortCode", (req, res) => {
         const getShort = await short.findOne({ encode: req.params.shortCode });
 
         if(getShort != null){
-            if(getShort.decode.length)
-                res.redirect(getShort.decode);
+            console.log(getShort.type)
+            if(getShort.decode.length){
+                if(getShort.type == "frame"){
+                    res.render('embed',{
+                        title: getShort.title,
+                        url : getShort.decode,
+                    });
+                }
+                else{
+                    res.redirect(getShort.decode);
+                }
+            }                
             else{
                 res.render('error',{
                     message : "không có thông tin decode cho: " + req.params.shortCode,

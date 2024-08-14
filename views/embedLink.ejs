@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Short Link</title>
+    <title>Embed Link</title>
 </head>
 <body>
-    <h1>Short Link <% if (typeof(formData) == "object"){ %> <%= formData.encode %> <% } %></h1>
+    <h1>Embed Link <% if (typeof(formData) == "object"){ %> <%= formData.encode %> <% } %></h1>
     <form action="<%= actionURL %>" method="POST" onsubmit="return ActionShortLink()">
         <% if (typeof(formData) == "object"){ %> 
             <input type="hidden" name="shortId" id="shortId" value="<%= formData._id %>">
@@ -27,15 +27,6 @@
                 <label for="inputTitle">Title</label>
                 <input type="text" name="title" id="inputTitle" placeholder="Title" <% if (typeof(formData) == "object"){ %> value="<%= formData.title %>" <% } %> >
             </div>
-            <% if (typeof(formData) == "undefined"){ %>
-            <div>
-                <label for="inputType">Type</label>
-                <select name="inputType" id="inputType">
-                    <option value="redirect" selected>Redirect URL</option>
-                    <option value="embed">Embed Frame</option>
-                </select>
-            </div>
-            <% } %>
             <div>
                 <label for="inputPassword">Password</label>
                 <input type="text" name="password" id="inputPassword" placeholder="URL Password" <% if (typeof(formData) == "object"){ %> value="<%= formData.password %>" <% } %> >
@@ -65,14 +56,9 @@
                     title: inputTitle.value,
                     alias: inputAlias.value,
                     password: inputPassword.value,
-                    
                 };
-                if(document.querySelector('#shortId')){
+                if(document.querySelector('#shortId'))
                     shortLinkData.id = document.querySelector('#shortId').value;
-                }                    
-                else{
-                    shortLinkData.type = document.querySelector('#inputType').value;
-                }
                 axios({
                     method: 'post',
                     url: '<%= actionURL %>',
